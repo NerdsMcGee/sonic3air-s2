@@ -692,6 +692,12 @@ void EngineMain::destroyWindow()
 {
 	mInternal.mVideoOut.destroyRenderer();
 	mDrawer.destroyDrawer();
+#ifdef PLATFORM_SWITCH
+	// SDL_DestroyWindow does not delete the OpenGL context. On Switch the process outlives the app (it is hosted by hbmenu),
+	// so a leaked context can make the next launch fail with "Could not initialize EGL"
+	if (SDL_GLContext glContext = SDL_GL_GetCurrentContext())
+		SDL_GL_DeleteContext(glContext);
+#endif
 	SDL_DestroyWindow(mSDLWindow);
 	mSDLWindow = nullptr;
 }
