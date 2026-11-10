@@ -146,7 +146,11 @@ public:
 	DevModeSettings mDevMode;
 
 	// Video
+#ifdef PLATFORM_SWITCH
+	WindowMode mWindowMode = WindowMode::BORDERLESS_FULLSCREEN;	// Switch 2 fork: use the display's real size (1080p handheld)
+#else
 	WindowMode mWindowMode = WindowMode::WINDOWED;
+#endif
 	Vec2i mWindowSize = Vec2i(1200, 672);
 	Vec2i mGameScreen = Vec2i(400, 224);
 	int   mDisplayIndex = 0;
@@ -155,7 +159,11 @@ public:
 	FrameSyncType mFrameSync = FrameSyncType::VSYNC_ON;
 	int   mUpscaling = 0;
 	int   mBackdrop = 0;
+#ifdef PLATFORM_SWITCH
+	int   mFiltering = 1;	// Switch 2 fork: smooth scaling (Soft 1) by default, the 1080p output is not an integer multiple of 400x224
+#else
 	int   mFiltering = 0;
+#endif
 	int   mScanlines = 0;
 	int   mBackgroundBlur = 0;
 	bool  mFullEmulationRendering = true;

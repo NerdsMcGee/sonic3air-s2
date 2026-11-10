@@ -41,6 +41,37 @@ Copy to the SD card, e.g. `/switch/sonic3air_switch/`:
 `Sonic_Knuckles_wSonic3.bin` (your own ROM, not distributed here).
 The game writes `savedata/logfile.txt` next to the NRO.
 
+## Resolution and display (Switch 2)
+
+The Switch 2 screen is 1080p. On Switch the engine now defaults to:
+
+- **Borderless fullscreen**, so the window takes the display's real size (1920 x 1080 handheld).
+  Fallback window size if the display size cannot be read: 1920 x 1080.
+- **Smooth scaling** (Options > Screen Filter: "Soft 1") instead of "Sharp". The game picture is
+  400 x 224, which scales 4.8x to fit 1920 wide, so integer pixel scaling is not possible.
+  The picture is aspect-fit: 1920 x 1075 with a 5 px bar at the top and bottom.
+
+Both are only defaults. A saved `savedata/settings.json` (Options menu) overrides them, e.g.
+`"Fullscreen": 1` and `"Filtering": 1`. Delete the file to get the defaults back.
+The internal game resolution is unchanged (400 x 224).
+
+## Troubleshooting
+
+- **Black screen when exiting the game at 1080p:** this happened with older libounce versions.
+  It is gone with SDK `ounce-sdk 20261111` (libounce `8e7da1ae`). Window sizes up to 1600 x 900
+  were fine with the older SDK.
+- **`Could not initialize EGL` in `savedata/logfile.txt`:** the graphics service was in a bad state,
+  e.g. after an earlier session that hung on exit. Relaunch hbmenu, then start the game again.
+  If it keeps failing, reboot the console.
+- **Build fails with `SDL.h: No such file or directory`:** a module in the pkg-config list is missing,
+  so the whole list returns nothing. Check them with
+  `$DEVKITPRO/portlibs/switch2/bin/aarch64-none-elf-pkg-config --exists <module>` for
+  `sdl2 ogg vorbis theora vorbisfile theoradec zlib minizip libglad egl`. Installing the Switch 2 SDK
+  can leave `$DEVKITPRO/portlibs/switch` empty even though pacman lists the packages as installed.
+  Reinstall them: `sudo dkp-pacman -S switch-sdl2 switch-libogg switch-libvorbis switch-libtheora switch-glad switch-zlib switch-pkg-config`.
+- **96 compiler warnings (`-Wstringop-overflow` in `librmx/source/rmxbase/StringImpl.h`)** with the newer
+  GCC are false positives from the string class and do not affect the build.
+
 ## Getting a working .NRO from the upstream repo
 
 Step by step, starting from [ultra-azu/sonic3air](https://github.com/ultra-azu/sonic3air)

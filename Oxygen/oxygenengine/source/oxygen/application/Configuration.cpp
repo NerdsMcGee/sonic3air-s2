@@ -606,6 +606,10 @@ void Configuration::loadConfigurationProperties(JsonHelper& rootHelper)
 	}
 
 	// Video
+#ifdef PLATFORM_SWITCH
+	// Switch 2 fork: default to 1080p (config.json WindowSize can still override, for testing)
+	mWindowSize.set(1920, 1080);
+#endif
 	tryParseWindowSize(rootHelper.mJson["WindowSize"].asString(), mWindowSize);
 	if (mDevMode.mEnabled)
 	{
