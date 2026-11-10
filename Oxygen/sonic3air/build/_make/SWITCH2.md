@@ -27,6 +27,10 @@ The result is `bin/Switch/sonic3air.nro`. `Makefile_cfgs/Platforms/Switch.cfg` i
   (connections fall back to IPv4).
 - `main.cpp`: initialize the libnx socket service in non-debug builds
   (`socketInitializeDefault`), otherwise networking fails with `socket failed with error: -1`.
+- `EngineMain.cpp`: delete the OpenGL context in `destroyWindow()` on Switch. Without it a second launch from hbmenu
+  failed with `Could not initialize EGL`.
+- `Configuration.h` / `Configuration.cpp`: on Switch default to borderless fullscreen (display size, 1920 x 1080 fallback)
+  and the smooth screen filter, see "Resolution and display" below.
 - lemonscript: upstream commit `165eef6d` ("method-like function calls") is reverted.
   With it, the script core hash is 358 and the shipped `data/scripts.bin` (hash 356,
   as in the release package) is rejected. The compiler also crashed on ARM with
@@ -60,9 +64,10 @@ The internal game resolution is unchanged (400 x 224).
 - **Black screen when exiting the game at 1080p:** this happened with older libounce versions.
   It is gone with SDK `ounce-sdk 20261111` (libounce `8e7da1ae`). Window sizes up to 1600 x 900
   were fine with the older SDK.
-- **`Could not initialize EGL` in `savedata/logfile.txt`:** the graphics service was in a bad state,
-  e.g. after an earlier session that hung on exit. Relaunch hbmenu, then start the game again.
-  If it keeps failing, reboot the console.
+- **`Could not initialize EGL` in `savedata/logfile.txt` when starting the game a second time:** the game leaked its OpenGL
+  context on exit, and on Switch the process outlives the app (hbmenu hosts it). Fixed: `destroyWindow()` now deletes the
+  context. If you see it anyway, e.g. after an earlier session that hung, relaunch hbmenu and start the game again; if it
+  keeps failing, reboot the console.
 - **Build fails with `SDL.h: No such file or directory`:** a module in the pkg-config list is missing,
   so the whole list returns nothing. Check them with
   `$DEVKITPRO/portlibs/switch2/bin/aarch64-none-elf-pkg-config --exists <module>` for
