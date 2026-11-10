@@ -88,6 +88,12 @@ extern "C" void userAppInit() { initNxLink(); }
 
 extern "C" void userAppExit() { deinitNxLink(); }
 #endif
+
+#ifndef DEBUG
+// Non-debug builds: libnx socket service is needed for the engine's networking code
+extern "C" void userAppInit() { socketInitializeDefault(); }
+extern "C" void userAppExit() { socketExit(); }
+#endif
 #endif
 
 // HJW: I know it's sloppy to put this here... it'll get moved afterwards

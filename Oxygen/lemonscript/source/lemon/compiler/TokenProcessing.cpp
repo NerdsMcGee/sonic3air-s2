@@ -124,6 +124,7 @@ namespace lemon
 		fillCachedBuiltInFunctionSingle(mBuiltinStringOperatorLessOrEqual,		globalsLookup, BuiltInFunctions::STRING_OPERATOR_LESS_OR_EQUAL);
 		fillCachedBuiltInFunctionSingle(mBuiltinStringOperatorGreater,			globalsLookup, BuiltInFunctions::STRING_OPERATOR_GREATER);
 		fillCachedBuiltInFunctionSingle(mBuiltinStringOperatorGreaterOrEqual,	globalsLookup, BuiltInFunctions::STRING_OPERATOR_GREATER_OR_EQUAL);
+		fillCachedBuiltInFunctionSingle(mBuiltinStringLength,					globalsLookup, BuiltInFunctions::STRING_LENGTH);
 	}
 
 	void TokenProcessing::processTokens(TokenList& tokensRoot, uint32 lineNumber, const DataTypeDefinition* resultType)
@@ -486,8 +487,8 @@ namespace lemon
 				const Function* function = nullptr;
 				const Variable* thisPointerVariable = nullptr;
 
-				const std::vector<Function*>* candidateFunctions = &mGlobalsLookup.getFunctionsByName(identifierToken.mName.getHash());
-				if (!candidateFunctions->empty())
+				const std::vector<Function*>& candidateFunctions = mGlobalsLookup.getFunctionsByName(identifierToken.mName.getHash());
+				if (!candidateFunctions.empty())
 				{
 					// Is it a global function
 				}
@@ -516,43 +517,33 @@ namespace lemon
 				}
 				else
 				{
+					// Special handling for "string.length()" and "array.length()"
+					//  -> TODO: Generalize this to pave the way for other kinds of "method calls"
 					bool isValidFunctionCall = false;
-
-					const size_t lastDot = functionName.find_last_of('.');
-					if (lastDot != std::string_view::npos)
+					if (rmx::endsWith(functionName, ".length") && content.empty())
 					{
-						const std::string_view contextPart = functionName.substr(0, lastDot);
-						const std::string_view namePart = functionName.substr(lastDot+1);
-
-						// Check for a method-like function call
-						//  -> First part must be an identifier of a variable in that case
-						thisPointerVariable = findVariable(rmx::getMurmur2_64(contextPart));
-						if (nullptr != thisPointerVariable)
+						const std::string_view variableName = functionName.substr(0, functionName.length() - 7);
+						const Variable* variable = findVariable(rmx::getMurmur2_64(variableName));
+						if (nullptr != variable && variable->getDataType() == &PredefinedDataTypes::STRING)
 						{
-							candidateFunctions = &mGlobalsLookup.getMethodsByName(thisPointerVariable->getDataType()->getName().getHash() + rmx::getMurmur2_64(namePart));
-							isValidFunctionCall = !candidateFunctions->empty();
+							function = mBuiltinStringLength.mFunctions[0];
+							thisPointerVariable = variable;
+							isValidFunctionCall = true;
 						}
-
-						if (!isValidFunctionCall)
+						else
 						{
-							// Special handling for "array.length()"
-							//  -> TODO: Unify this with the method-like function call stuff above
-							if (namePart == "length" && content.empty())
+							const ConstantArray* constantArray = findConstantArray(rmx::getMurmur2_64(variableName));
+							if (nullptr != constantArray)
 							{
-								const ConstantArray* constantArray = findConstantArray(rmx::getMurmur2_64(contextPart));
-								if (nullptr != constantArray)
-								{
-									// This can simply be replaced with a compile-time constant
-									ConstantToken& constantToken = tokens.createReplaceAt<ConstantToken>(i);
-									constantToken.mValue = (uint64)constantArray->getSize();
-									constantToken.mDataType = &PredefinedDataTypes::CONST_INT;
-									tokens.erase(i+1);
-									continue;
-								}
+								// This can simply be replaced with a compile-time constant
+								ConstantToken& constantToken = tokens.createReplaceAt<ConstantToken>(i);
+								constantToken.mValue = (uint64)constantArray->getSize();
+								constantToken.mDataType = &PredefinedDataTypes::CONST_INT;
+								tokens.erase(i+1);
+								continue;
 							}
 						}
 					}
-
 					CHECK_ERROR(isValidFunctionCall, "Unknown function name '" << functionName << "'", mLineNumber);
 				}
 
@@ -582,9 +573,7 @@ namespace lemon
 				}
 				if (nullptr != thisPointerVariable)
 				{
-					// Add as implicit first parameter
-					const auto it = functionToken.mParameters.emplace(functionToken.mParameters.begin());
-					VariableToken& variableToken = it->create<VariableToken>();
+					VariableToken& variableToken = vectorAdd(functionToken.mParameters).create<VariableToken>();
 					variableToken.mVariable = thisPointerVariable;
 					variableToken.mDataType = thisPointerVariable->getDataType();
 				}
@@ -645,7 +634,7 @@ namespace lemon
 						// Find best-fitting correct function overload
 						function = nullptr;
 						uint32 bestPriority = 0xff000000;
-						for (const Function* candidateFunction : *candidateFunctions)
+						for (const Function* candidateFunction : candidateFunctions)
 						{
 							const uint32 priority = mTypeCasting.getPriorityOfSignature(parameterTypes, candidateFunction->getParameters());
 							if (priority < bestPriority)
@@ -774,7 +763,7 @@ namespace lemon
 				// Check the identifier
 				IdentifierToken& identifierToken = tokens[i].as<IdentifierToken>();
 				const Variable* variable = nullptr;
-				if (nullptr != identifierToken.mResolved && identifierToken.mResolved->getType() == GlobalsLookup::Identifier::Type::VARIABLE)
+				if (nullptr != identifierToken.mResolved && identifierToken.mResolved->getType() == GlobalsLookup::Identifier::Type::GLOBAL_VARIABLE)
 				{
 					variable = &identifierToken.mResolved->as<Variable>();
 				}
@@ -1284,18 +1273,16 @@ namespace lemon
 	{
 		// Search for local variables first
 		const Variable* variable = findLocalVariable(nameHash);
-		if (nullptr != variable)
-			return variable;
-
-		// Maybe it's a global variable
-		const GlobalsLookup::Identifier* resolvedIdentifier = mGlobalsLookup.resolveIdentifierByHash(nameHash);
-		if (nullptr != resolvedIdentifier && resolvedIdentifier->getType() == GlobalsLookup::Identifier::Type::VARIABLE)
+		if (nullptr == variable)
 		{
-			return &resolvedIdentifier->as<Variable>();
+			// Maybe it's a global variable
+			const GlobalsLookup::Identifier* resolvedIdentifier = mGlobalsLookup.resolveIdentifierByHash(nameHash);
+			if (nullptr != resolvedIdentifier && resolvedIdentifier->getType() == GlobalsLookup::Identifier::Type::GLOBAL_VARIABLE)
+			{
+				variable = &resolvedIdentifier->as<Variable>();
+			}
 		}
-
-		// Not found
-		return nullptr;
+		return variable;
 	}
 
 	LocalVariable* TokenProcessing::findLocalVariable(uint64 nameHash)

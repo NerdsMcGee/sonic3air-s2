@@ -53,8 +53,7 @@ namespace lemon
 		inline BitFlagSet<Flag> getFlags() const  { return mFlags; }
 		inline bool hasFlag(Flag flag) const	  { return mFlags.isSet(flag); }
 
-		inline FlyweightString getContext() const { return mContext; }
-		inline FlyweightString getName() const    { return mName; }
+		inline FlyweightString getName() const { return mName; }
 		inline uint64 getNameAndSignatureHash() const { return mNameAndSignatureHash; }
 
 		const DataTypeDefinition* getReturnType() const  { return mReturnType; }
@@ -74,7 +73,6 @@ namespace lemon
 		BitFlagSet<Flag> mFlags;
 
 		// Metadata
-		FlyweightString mContext;		// Name of the type if this is a method-like function
 		FlyweightString mName;
 		uint64 mNameAndSignatureHash = 0;
 

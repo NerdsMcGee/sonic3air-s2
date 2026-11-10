@@ -95,3 +95,8 @@ framework/external/sdl/SDL2/Xcode/SDL/SDL.xcodeproj/xcuserdata
 framework/external/ogg-vorbis/libvorbis/xcode/build
 framework/external/ogg-vorbis/libvorbis/xcode/vorbis.xcodeproj/project.xcworkspace/xcuserdata
 framework/external/ogg-vorbis/libvorbis/xcode/vorbis.xcodeproj/xcuserdata
+
+# Build outputs
+Oxygen/sonic3air/build/_make/obj/
+Oxygen/sonic3air/build/_make/bin/
+.DS_Store

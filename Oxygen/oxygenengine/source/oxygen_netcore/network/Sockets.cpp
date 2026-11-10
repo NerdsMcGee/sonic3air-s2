@@ -150,6 +150,7 @@ void SocketAddress::assureSockAddr() const
 	{
 		memset(&mSockAddr, 0, sizeof(mSockAddr));
 		bool success = false;
+#ifndef __SWITCH__
 		{
 			// IPv6
 			sockaddr_in6& addr = *reinterpret_cast<sockaddr_in6*>(&mSockAddr);
@@ -157,6 +158,7 @@ void SocketAddress::assureSockAddr() const
 			addr.sin6_port = htons(mPort);
 			success = (1 == inet_pton(addr.sin6_family, mIP.c_str(), &addr.sin6_addr));
 		}
+#endif // __SWITCH__ (libnx has no sockaddr_in6)
 		if (!success)
 		{
 			// IPv4
