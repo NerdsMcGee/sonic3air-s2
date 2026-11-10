@@ -12,6 +12,7 @@ Project homepage: https://sonic3air.org/
 > It has been tested on hardware: the game boots, renders with OpenGL and is playable.
 >
 > * Build: `Oxygen/sonic3air/build/_make/build_switch2.sh`, see [SWITCH2.md](Oxygen/sonic3air/build/_make/SWITCH2.md) for requirements and the list of changes.
+> * Getting an NRO from the upstream repo, step by step: see [SWITCH2.md](Oxygen/sonic3air/build/_make/SWITCH2.md#getting-a-working-nro-from-the-upstream-repo).
 > * Download: see the [Releases](../../releases) page. You need to supply your own `Sonic_Knuckles_wSonic3.bin` ROM, which is not included.
 > * The default branch is `switch2-libounce`. All credit for the game, engine and original Switch port goes to the upstream authors.
 
