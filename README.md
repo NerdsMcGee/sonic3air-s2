@@ -4,6 +4,17 @@ Source code incl. dependencies for "Sonic 3 - Angel Island Revisited", a fan-mad
 
 Project homepage: https://sonic3air.org/
 
+> ## Fork notice: Switch 2 port (libounce)
+>
+> This repository is a fork of [Eukaryot/sonic3air](https://github.com/Eukaryot/sonic3air), modified to use the **libounce** SDK
+> (a libnx-compatible library for the Switch 2) with devkitPro, and it **builds for the Nintendo Switch 2**.
+> It has been tested on hardware: the game boots, renders with OpenGL at 1080p and is playable.
+>
+> * The Switch 2 changes are a small set of commits on top of the upstream test build `v26.08.15.0`, see [SWITCH2.md](Oxygen/sonic3air/build/_make/SWITCH2.md) for the build requirements and the list of changes.
+> * Build: `Oxygen/sonic3air/build/_make/build_switch2.sh`. Step by step, starting from the upstream repo: [SWITCH2.md](Oxygen/sonic3air/build/_make/SWITCH2.md#getting-a-working-nro-from-the-upstream-repo).
+> * Download: see the [Releases](../../releases) page. You need to supply your own `Sonic_Knuckles_wSonic3.bin` ROM, which is not included.
+> * The fork's work lives on the branch `switch2-libounce-v26`. All credit for the game and the engine goes to the upstream authors.
+
 
 ### Disclaimer
 
