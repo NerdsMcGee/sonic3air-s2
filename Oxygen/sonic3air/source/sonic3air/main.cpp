@@ -26,6 +26,23 @@ long pathconf(const char* path, int name)
 }
 #endif
 
+#if defined(PLATFORM_SWITCH)
+// Not including libnx's headers here: <switch.h> defines a Framebuffer struct that clashes with the engine's Framebuffer class
+extern "C" unsigned int socketInitialize(const void* config);	// A null config selects the default configuration
+extern "C" void socketExit(void);
+
+// Switch 2 fork: the libnx socket service must be started for the engine's networking code, or sockets fail with error -1
+extern "C" void userAppInit()
+{
+	socketInitialize(nullptr);
+}
+
+extern "C" void userAppExit()
+{
+	socketExit();
+}
+#endif
+
 #if defined(PLATFORM_WINDOWS) & !defined(__GNUC__)
 extern "C"
 {

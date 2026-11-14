@@ -246,6 +246,13 @@ Configuration::Configuration()
 	mAudio.mUseAudioThreading = false;
 #endif
 
+#if defined(PLATFORM_SWITCH)
+	// Switch 2 fork: smooth scaling (the 'Soft 1' pixel filter) by default, as the 1080p output is not an integer multiple of 400x224
+	mScreenFilter.mUpscalerName = "pixel";
+	mScreenFilter.mUpscalerNameHash = rmx::getMurmur2_64(mScreenFilter.mUpscalerName);
+	mScreenFilter.mPixelVariant = 1;
+#endif
+
 #if defined(PLATFORM_ANDROID) || defined(PLATFORM_WEB)
 	// Use a much larger default UI scale on mobile platforms, otherwise it's too finicky to interact with ImGui at all
 	mDevMode.mUIScale = 2.5f;

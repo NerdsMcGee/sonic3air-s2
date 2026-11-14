@@ -116,11 +116,9 @@ SRCDIRS := \
 	Oxygen/oxygenengine/source/oxygen_netcore \
 	Oxygen/sonic3air/source/sonic3air
 SOURCES += $(patsubst $(BASEDIR)/%.cpp,%,$(shell find $(addprefix $(BASEDIR)/,$(SRCDIRS)) -name '*.cpp'))
-SOURCES += $(patsubst $(BASEDIR)/%.cpp,%,$(wildcard \
-	$(BASEDIR)/librmx/source/rmxbase/*.cpp \
-	$(BASEDIR)/librmx/source/rmxbase/_jsoncpp/*.cpp \
-	$(BASEDIR)/librmx/source/rmxmedia/*.cpp \
-	$(BASEDIR)/librmx/source/rmxext_oggvorbis/*.cpp))
+# librmx: rmxbase and rmxmedia are globbed recursively, rmxext_oggvorbis is not (as in the CMake build)
+SOURCES += $(patsubst $(BASEDIR)/%.cpp,%,$(shell find $(BASEDIR)/librmx/source/rmxbase $(BASEDIR)/librmx/source/rmxmedia -name '*.cpp'))
+SOURCES += $(patsubst $(BASEDIR)/%.cpp,%,$(wildcard $(BASEDIR)/librmx/source/rmxext_oggvorbis/*.cpp))
 
 # =============================================================================
 

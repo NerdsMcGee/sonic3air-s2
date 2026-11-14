@@ -754,8 +754,10 @@ bool UDPSocket::sendData(const uint8* data, size_t length, const SocketAddress& 
 	int family = addr->sa_family;
 	if (family == AF_INET) {
 		addrlen = sizeof(sockaddr_in);
+#if !defined(PLATFORM_SWITCH)	// libnx has no sockaddr_in6
 	} else if (family == AF_INET6) {
 		addrlen = sizeof(sockaddr_in6);
+#endif
 	} else {
 		addrlen = sizeof(sockaddr_storage); //Unknown address family
 	}

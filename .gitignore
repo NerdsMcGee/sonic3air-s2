@@ -104,3 +104,8 @@ framework/external/ogg-vorbis/libvorbis/xcode/vorbis.xcodeproj/xcuserdata
 Oxygen/sonic3air/build/_xcode/build/XCBuildData
 Oxygen/sonic3air/build/_xcode/build/sonic3air.build
 framework/external/sdl/SDL2/Xcode/SDL/build/SDL.build
+
+# Switch 2 fork build outputs
+Oxygen/sonic3air/build/_make/obj/
+Oxygen/sonic3air/build/_make/bin/
+.DS_Store
