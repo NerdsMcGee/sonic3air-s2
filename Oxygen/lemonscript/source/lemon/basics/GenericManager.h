@@ -252,11 +252,13 @@ namespace genericmanager
 
 		void set(ELEMENT* element)
 		{
-			if (nullptr != mElement)
-				mElement->removeReference();
+			// Add the new reference first: the new element might be owned (directly or indirectly) by the old one, which would get destroyed otherwise
+			if (nullptr != element)
+				element->addReference();
+			ELEMENT* oldElement = mElement;
 			mElement = element;
-			if (nullptr != mElement)
-				mElement->addReference();
+			if (nullptr != oldElement)
+				oldElement->removeReference();
 		}
 
 		void swapWith(ElementPtr& ptr)
@@ -270,10 +272,11 @@ namespace genericmanager
 
 		inline void operator=(ElementPtr&& ptr)
 		{
-			if (nullptr != mElement)
-				mElement->removeReference();
+			ELEMENT* oldElement = mElement;
 			mElement = ptr.mElement;
 			ptr.mElement = nullptr;
+			if (nullptr != oldElement)
+				oldElement->removeReference();
 		}
 
 		inline ELEMENT& operator*()				  { return *mElement; }
@@ -418,9 +421,11 @@ namespace genericmanager
 			}
 			else
 			{
-				mElements[index]->removeReference();
-				mElements[index] = &element;
+				// Add the new reference first, in case the new element is owned by the old one
 				element.addReference();
+				ELEMENT* oldElement = mElements[index];
+				mElements[index] = &element;
+				oldElement->removeReference();
 			}
 		}
 

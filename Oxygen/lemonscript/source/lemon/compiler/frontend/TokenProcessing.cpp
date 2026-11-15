@@ -1204,8 +1204,8 @@ namespace lemon
 					// Move parenthesis content to the output token pointer, so it will replace the parenthesis itself
 					TokenPtr<StatementToken> tempContentPtr;
 					tempContentPtr = pt.mContent[0].as<StatementToken>();	// This intermediate step is needed to avoid reference count reaching 0 in between
+					pt.mContent.clear();		// Must happen before the next line, as outTokenPtr can be the only reference to the parenthesis token, so assigning it destroys "pt"
 					outTokenPtr = tempContentPtr;
-					pt.mContent.clear();
 					return true;
 				}
 				break;
