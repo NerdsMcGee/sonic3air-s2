@@ -1,0 +1,2 @@
+# Keep LF endings so the shebang works when checked out on Windows
+Oxygen/sonic3air/build/_make/build_switch2.sh text eol=lf
